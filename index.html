@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Lista de Compras - Simples</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="container">
+    <h1>Lista de Compras</h1>
+
+    <form id="itemForm" class="form">
+      <label for="name">Produto <span class="req">*</span></label>
+      <input id="name" type="text" maxlength="100" required>
+
+      <label for="quantity">Quantidade <span class="req">*</span></label>
+      <input id="quantity" type="number" min="1" value="1" required>
+
+      <label for="category">Categoria</label>
+      <select id="category">
+        <option value="Alimentos">Alimentos</option>
+        <option value="Bebidas">Bebidas</option>
+        <option value="Limpeza">Limpeza</option>
+        <option value="Higiene">Higiene</option>
+        <option value="Outros">Outros</option>
+      </select>
+
+      <div class="form-actions">
+        <button type="submit" id="addBtn">Adicionar</button>
+      </div>
+    </form>
+
+    <div class="controls">
+      <button id="saveBtn">Gravar dados</button>
+      <button id="loadBtn">Recuperar dados</button>
+      <button id="clearBtn">Limpar dados</button>
+    </div>
+
+    <h2>Itens Pendentes</h2>
+    <ul id="pendingList" class="list"></ul>
+
+    <h2>Itens Comprados</h2>
+    <ul id="boughtList" class="list"></ul>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
