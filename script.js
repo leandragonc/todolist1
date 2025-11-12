@@ -1,107 +1,100 @@
-const nomeProduto = document.getElementById('name')
-const quantidade = document.getElementById('quantity')
-const categoria = document.getElementById('category')
-const listaPendentes = document.getElementById('pendingList')
-const listaComprados = document.getElementById('boughtList')
+const formulario = document.getElementById('formulario');
+const listaPendentes = document.getElementById('listaPendentes');
+const listaComprados = document.getElementById('listaComprados');
+const btnGravar = document.getElementById('gravar');
+const btnRecuperar = document.getElementById('recuperar');
+const btnLimpar = document.getElementById('limpar');
 
-const botaoGravar = document.getElementById('saveBtn')
-const botaoRecuperar = document.getElementById('loadBtn')
-const botaoLimpar = document.getElementById('clearBtn')
+let itens = [];
 
-let pendentes = []
-let comprados = []
+// Adicionar item
+formulario.addEventListener('submit', (e) => {
+  e.preventDefault();
 
+  const produto = document.getElementById('produto').value.trim();
+  const quantidade = document.getElementById('quantidade').value;
+  const categoria = document.getElementById('categoria').value;
+
+  if (!produto) return;
+
+  const item = {
+    id: Date.now(),
+    produto,
+    quantidade,
+    categoria,
+    comprado: false
+  };
+
+  itens.push(item);
+  atualizarListas();
+  formulario.reset();
+});
+
+// Atualiza listas na tela
 function atualizarListas() {
-  listaPendentes.innerHTML = ''
-  listaComprados.innerHTML = ''
+  listaPendentes.innerHTML = '';
+  listaComprados.innerHTML = '';
 
-  // Itens pendentes
-  pendentes.forEach((item, i) => {
-    const li = document.createElement('li')
+  itens.forEach(item => {
+    const li = document.createElement('li');
     li.innerHTML = `
-      <div>${item.nome} — ${item.qtd} (${item.categoria})</div>
+      <span>${item.produto} — ${item.quantidade} (${item.categoria})</span>
       <div>
-        <button onclick="marcarComoComprado(${i})">✔️</button>
-        <button onclick="excluirItem(${i})">🗑️</button>
+        ${!item.comprado ? `<button onclick="comprar(${item.id})">✔️</button>` : ''}
+        <button onclick="remover(${item.id})">🗑️</button>
       </div>
-    `
-    listaPendentes.appendChild(li)
-  })
+    `;
 
-  // Itens comprados
-  comprados.forEach((item, i) => {
-    const li = document.createElement('li')
-    li.innerHTML = `
-      <div class="feito">${item.nome} — ${item.qtd} (${item.categoria})</div>
-      <button onclick="excluirComprado(${i})">Excluir</button>
-    `
-    listaComprados.appendChild(li)
-  })
+    if (item.comprado) {
+      li.classList.add('feito');
+      listaComprados.appendChild(li);
+    } else {
+      listaPendentes.appendChild(li);
+    }
+  });
 }
 
-// Adicionar item novo
-document.getElementById('itemForm').addEventListener('submit', (e) => {
-  e.preventDefault()
+// Marcar como comprado
+function comprar(id) {
+  const item = itens.find(i => i.id === id);
+  if (item) item.comprado = true;
+  atualizarListas();
+}
 
-  if (nomeProduto.value === '' || quantidade.value <= 0) {
-    alert('Preencha o nome e a quantidade!')
-    return
+// Remover item
+function remover(id) {
+  itens = itens.filter(i => i.id !== id);
+  atualizarListas();
+}
+
+// Gravar no LocalStorage
+btnGravar.addEventListener('click', () => {
+  localStorage.setItem('listaCompras', JSON.stringify(itens));
+});
+
+// Recuperar
+btnRecuperar.addEventListener('click', () => {
+  const dados = localStorage.getItem('listaCompras');
+  if (dados) {
+    itens = JSON.parse(dados);
+    atualizarListas();
+  } else {
+    alert('Nenhum dado salvo.');
   }
+});
 
-  const novoItem = {
-    nome: nomeProduto.value,
-    qtd: quantidade.value,
-    categoria: categoria.value
+// Limpar tudo
+btnLimpar.addEventListener('click', () => {
+  localStorage.removeItem('listaCompras');
+  itens = [];
+  atualizarListas();
+});
+
+// Recuperar automaticamente ao abrir
+window.addEventListener('load', () => {
+  const dadosSalvos = localStorage.getItem('listaCompras');
+  if (dadosSalvos) {
+    itens = JSON.parse(dadosSalvos);
+    atualizarListas();
   }
-
-  pendentes.push(novoItem)
-  nomeProduto.value = ''
-  quantidade.value = 1
-  atualizarListas()
-})
-
-function marcarComoComprado(i) {
-  comprados.push(pendentes[i])
-  pendentes.splice(i, 1)
-  atualizarListas()
-}
-
-function excluirItem(i) {
-  pendentes.splice(i, 1)
-  atualizarListas()
-}
-
-function excluirComprado(i) {
-  comprados.splice(i, 1)
-  atualizarListas()
-}
-
-// LocalStorage
-botaoGravar.addEventListener('click', () => {
-  localStorage.setItem('pendentes', JSON.stringify(pendentes))
-  localStorage.setItem('comprados', JSON.stringify(comprados))
-  alert('Dados gravados com sucesso!')
-})
-
-botaoRecuperar.addEventListener('click', () => {
-  pendentes = JSON.parse(localStorage.getItem('pendentes')) || []
-  comprados = JSON.parse(localStorage.getItem('comprados')) || []
-  atualizarListas()
-  alert('Dados recuperados!')
-})
-
-botaoLimpar.addEventListener('click', () => {
-  localStorage.removeItem('pendentes')
-  localStorage.removeItem('comprados')
-  pendentes = []
-  comprados = []
-  atualizarListas()
-  alert('Dados apagados!')
-})
-
-// Carregar automaticamente ao abrir a página
-window.onload = () => {
-  pendentes = JSON.parse(localStorage.getItem('pendentes')) || []
-  comprados = JSON.parse(localStorage.getItem('comprados')) || []
-  atualizarListas()
-}
+});
